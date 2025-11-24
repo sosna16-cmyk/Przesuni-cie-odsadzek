@@ -1,135 +1,113 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Kalkulator odsadzki Z1</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator przesunięcia</title>
+
 <style>
-  :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-  body{max-width:760px;margin:28px auto;padding:18px;background:#f7f7fb;border-radius:10px;color:#222}
-  h1{font-size:1.2rem;margin:.2rem 0 1rem}
-  .row{display:flex;gap:12px;align-items:center;margin-bottom:10px}
-  label{min-width:68px}
-  input[type="number"]{flex:1;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:1rem}
-  input[readonly]{background:#eee}
-  .note{font-size:.9rem;color:#444;margin-top:6px}
-  .result-box{margin-top:14px;padding:12px;border-radius:8px;background:#fff;border:1px solid #e0e0e6}
-  .small{font-size:.9rem;color:#555}
-  button{margin-left:auto;padding:8px 12px;border-radius:6px;border:0;background:#176ad6;color:white;cursor:pointer}
-  img.sample{display:block;max-width:100%;margin-top:12px;border-radius:6px;border:1px solid #ddd}
-  footer{font-size:.85rem;color:#666;margin-top:16px}
-  .flex-between{display:flex;gap:12px;align-items:center}
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        background: #ffffff;
+        padding: 25px;
+        width: 90%;
+        max-width: 400px;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        text-align: left;
+        margin-bottom: 5px;
+        font-weight: bold;
+        background: #ddd;
+        padding: 8px;
+        border-radius: 10px;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        background: #ff8c00;
+        border: none;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 12px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #e67e00;
+    }
+
+    .result {
+        margin-top: 20px;
+        background: #fff8e6;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: bold;
+    }
 </style>
 </head>
+
 <body>
-  <h1>Kalkulator odsadzki Z1 (przesunięcie początku gięcia)</h1>
 
-  <div class="row">
-    <label for="A">A (mm)</label>
-    <input id="A" type="number" step="any" value="40" min="0" />
-    <button id="reset">Reset</button>
-  </div>
+<div class="container">
+    <h2>Przesunięcie odsadzek</h2>
 
-  <div class="row">
-    <label for="B">B (°)</label>
-    <input id="B" type="number" step="any" value="45" min="0" max="90" />
-    <div style="min-width:140px;text-align:right" class="small">Kąt jednego zgięcia α</div>
-  </div>
+    <label>Żądana odległość A (mm)</label>
+    <input type="number" id="A" placeholder="np. 40">
 
-  <div class="row">
-    <label for="C">C = Z1 (mm)</label>
-    <input id="C" type="number" step="any" readonly />
-    <div style="min-width:140px;text-align:right" class="small">Wynik (A · tan(α/2))</div>
-  </div>
+    <label>Żądany kąt (°)</label>
+    <input type="number" id="angle" placeholder="np. 45">
 
-  <div class="result-box">
-    <div class="flex-between">
-      <div>
-        <div class="small">Dodatkowo (informacyjne):</div>
-        <div id="deltaText" class="small">Różnica długości łuków Δ ≈ — mm</div>
-      </div>
-      <div style="text-align:right">
-        <button id="copyBtn">Kopiuj Z1</button>
-      </div>
-    </div>
-  </div>
+    <button onclick="calc()">OBLICZ</button>
 
-  <p class="note">
-    Instrukcja: wpisz A (center-to-center) w mm i kąt α w stopniach (np. 45). Pole C jest wyliczane automatycznie.
-    Wzór użyty: <strong>Z1 = A · tan(α/2)</strong>. (Δ = A · Θ, gdzie Θ = suma kątów w radianach = 2·α_rad).
-  </p>
-
-  <!-- Twoje zdjęcie (lokalna ścieżka przesłana w konwersacji) -->
-  <img class="sample" alt="Twoje zdjęcie z aplikacji" src="/mnt/data/IMG_15661B00-83D2-4B1D-ADAE-D194844217A3.jpeg">
-
-  <footer>Gotowe do wrzucenia na GitHub. Zadziała offline w przeglądarce.</footer>
+    <div class="result" id="output">C = — mm</div>
+</div>
 
 <script>
-(function(){
-  const A = document.getElementById('A');
-  const B = document.getElementById('B');
-  const C = document.getElementById('C');
-  const deltaText = document.getElementById('deltaText');
-  const resetBtn = document.getElementById('reset');
-  const copyBtn = document.getElementById('copyBtn');
+function calc() {
+    let A = parseFloat(document.getElementById("A").value);
+    let angle = parseFloat(document.getElementById("angle").value);
 
-  function toNum(x){ return (x===''||x===null)? NaN : Number(x); }
-
-  function calc(){
-    const a = toNum(A.value);
-    const alphaDeg = toNum(B.value);
-
-    if (!isFinite(a) || !isFinite(alphaDeg)) {
-      C.value = '';
-      deltaText.textContent = 'Różnica długości łuków Δ ≈ — mm';
-      return;
+    if (isNaN(A) || isNaN(angle) || angle <= 0) {
+        document.getElementById("output").innerHTML = "C = — mm";
+        return;
     }
 
-    // α/2 in radians
-    const halfRad = (alphaDeg/2) * Math.PI / 180;
-    const z1 = a * Math.tan(halfRad);
+    // Obliczenie przesunięcia miarki (Z1 → teraz C)
+    let C = A * Math.tan((angle / 2) * Math.PI / 180);
 
-    // Δ approx = A * Theta, Theta = sum of angles in radians (two equal bends -> 2*alpha_rad)
-    const alphaRad = alphaDeg * Math.PI / 180;
-    const theta = 2 * alphaRad; // sum of both bend angles
-    const delta = a * theta; // approx difference of arc lengths center-to-center
-
-    // format to 3 decimals if fractional, otherwise integer
-    function fmt(v){
-      if (!isFinite(v)) return '';
-      return (Math.abs(v) < 0.0005) ? '0.000' : (Math.round(v*1000)/1000).toString();
-    }
-
-    C.value = fmt(z1);
-    deltaText.textContent = 'Różnica długości łuków Δ ≈ ' + fmt(delta) + ' mm (informacyjnie)';
-  }
-
-  // events
-  A.addEventListener('input', calc);
-  B.addEventListener('input', calc);
-  // reset button
-  resetBtn.addEventListener('click', function(){
-    A.value = 40;
-    B.value = 45;
-    calc();
-  });
-
-  copyBtn.addEventListener('click', function(){
-    const val = C.value;
-    if (!val) return;
-    navigator.clipboard?.writeText(val).then(()=> {
-      copyBtn.textContent = 'Skopiowano!';
-      setTimeout(()=> copyBtn.textContent = 'Kopiuj Z1', 1200);
-    }).catch(()=> {
-      copyBtn.textContent = 'Błąd kopiowania';
-      setTimeout(()=> copyBtn.textContent = 'Kopiuj Z1', 1200);
-    });
-  });
-
-  // init
-  calc();
-
-})();
+    document.getElementById("output").innerHTML = "C = " + C.toFixed(1) + " mm";
+}
 </script>
+
 </body>
 </html>
